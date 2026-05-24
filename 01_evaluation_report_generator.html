@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>광야의 기록 · 수련회 평가 리포트 생성기</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#1a1611; --bg2:#221c14; --panel:#28201704; --panel-solid:#2b231a;
+    --sand:#3a2f22; --sand-light:#4a3c2b;
+    --gold:#d9a85f; --gold-bright:#f0c98a; --gold-dim:#9c7c4f;
+    --ink:#e8ddc8; --ink-dim:#b6a888; --ink-faint:#7d7059;
+    --line:#3d3325;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Gowun Batang',serif;
+    min-height:100vh;
+    line-height:1.8;
+    overflow-x:hidden;
+  }
+  /* desert glow backdrop */
+  body::before{
+    content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:
+      radial-gradient(circle at 50% 18%, rgba(217,168,95,.22), transparent 38%),
+      radial-gradient(circle at 50% 18%, rgba(240,201,138,.12), transparent 22%),
+      linear-gradient(180deg,#1a1611 0%,#1f1812 55%,#161109 100%);
+  }
+  .stars{position:fixed;inset:0;z-index:0;pointer-events:none;}
+  .star{position:absolute;background:#f4e8c8;border-radius:50%;opacity:.5;
+    animation:tw 5s ease-in-out infinite;}
+  @keyframes tw{0%,100%{opacity:.15}50%{opacity:.7}}
+  .wrap{position:relative;z-index:2;max-width:880px;margin:0 auto;padding:60px 28px 100px;}
+
+  header{text-align:center;margin-bottom:54px;}
+  .chapter{font-family:'Nanum Myeongjo',serif;font-size:.78rem;letter-spacing:.5em;
+    color:var(--gold-dim);text-transform:uppercase;margin-bottom:26px;}
+  /* sun motif */
+  .sun{width:60px;height:60px;margin:0 auto 26px;border-radius:50%;
+    background:radial-gradient(circle,#f0c98a 0%,#d9a85f 45%,transparent 72%);
+    box-shadow:0 0 50px 14px rgba(217,168,95,.35);}
+  h1{font-family:'Nanum Myeongjo',serif;font-weight:800;font-size:2.5rem;
+    letter-spacing:.04em;color:var(--ink);margin-bottom:14px;line-height:1.3;}
+  h1 .x{color:var(--gold-bright);}
+  .subtitle{color:var(--ink-dim);font-size:1rem;letter-spacing:.06em;}
+  .verse{margin-top:20px;font-style:italic;color:var(--ink-faint);font-size:.9rem;}
+
+  .card{
+    background:linear-gradient(180deg,rgba(43,35,26,.85),rgba(34,28,20,.85));
+    border:1px solid var(--line);border-radius:4px;
+    padding:38px 40px;margin-bottom:26px;
+    box-shadow:0 20px 50px rgba(0,0,0,.4);
+  }
+  .card-label{font-family:'Nanum Myeongjo',serif;letter-spacing:.32em;
+    font-size:.72rem;color:var(--gold);text-transform:uppercase;margin-bottom:8px;}
+  .card h2{font-family:'Nanum Myeongjo',serif;font-weight:700;font-size:1.4rem;
+    color:var(--ink);margin-bottom:24px;border-bottom:1px solid var(--line);
+    padding-bottom:14px;}
+
+  label{display:block;font-size:.86rem;color:var(--ink-dim);
+    margin:18px 0 7px;letter-spacing:.04em;}
+  label:first-of-type{margin-top:0;}
+  input,select,textarea{
+    width:100%;background:#171209;border:1px solid var(--line);
+    border-radius:3px;padding:12px 14px;color:var(--ink);
+    font-family:'Gowun Batang',serif;font-size:.95rem;transition:border-color .25s;
+  }
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold);}
+  textarea{resize:vertical;min-height:84px;line-height:1.7;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 22px;}
+  .hint{font-size:.78rem;color:var(--ink-faint);margin-top:5px;}
+
+  .rating-row{display:flex;align-items:center;justify-content:space-between;
+    padding:13px 0;border-bottom:1px dashed var(--line);}
+  .rating-row:last-child{border-bottom:none;}
+  .rating-row span{font-size:.92rem;color:var(--ink);}
+  .stars-pick{display:flex;gap:5px;}
+  .sp{width:26px;height:26px;cursor:pointer;border:none;background:none;
+    color:var(--ink-faint);font-size:1.3rem;transition:color .15s,transform .15s;}
+  .sp.on{color:var(--gold-bright);}
+  .sp:hover{transform:scale(1.2);}
+
+  .btn{
+    display:block;width:100%;margin-top:30px;padding:16px;
+    background:linear-gradient(180deg,var(--gold-bright),var(--gold));
+    color:#1a1207;border:none;border-radius:3px;cursor:pointer;
+    font-family:'Nanum Myeongjo',serif;font-weight:800;font-size:1rem;
+    letter-spacing:.16em;transition:transform .2s,box-shadow .2s;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(217,168,95,.3);}
+  .btn.ghost{background:none;border:1px solid var(--gold-dim);color:var(--gold);
+    box-shadow:none;}
+  .btn.ghost:hover{background:rgba(217,168,95,.08);box-shadow:none;}
+
+  /* report output */
+  #report{display:none;margin-top:40px;}
+  .report-sheet{
+    background:linear-gradient(180deg,#fdf6e6,#f3e6c8);
+    color:#2a2114;border-radius:4px;padding:54px 50px;
+    box-shadow:0 30px 70px rgba(0,0,0,.55);
+    font-family:'Gowun Batang',serif;position:relative;
+  }
+  .report-sheet::before{content:"";position:absolute;inset:0;border:1px solid #c9b487;
+    margin:14px;pointer-events:none;border-radius:2px;}
+  .rs-head{text-align:center;border-bottom:2px solid #8a7444;
+    padding-bottom:20px;margin-bottom:28px;}
+  .rs-chapter{letter-spacing:.42em;font-size:.68rem;color:#a67c3c;
+    font-family:'Nanum Myeongjo',serif;text-transform:uppercase;}
+  .rs-title{font-family:'Nanum Myeongjo',serif;font-weight:800;font-size:1.85rem;
+    margin:12px 0 6px;color:#2a2114;}
+  .rs-meta{font-size:.84rem;color:#6b5a38;}
+  .rs-section{margin-bottom:26px;}
+  .rs-section h3{font-family:'Nanum Myeongjo',serif;font-size:1.05rem;
+    color:#7a5a1f;border-left:3px solid #c99a3f;padding-left:11px;margin-bottom:12px;}
+  .rs-section p{font-size:.95rem;line-height:1.85;color:#3a3020;white-space:pre-wrap;}
+  .rs-stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .rs-stat{background:#ece0c0;border:1px solid #d3c195;border-radius:3px;
+    padding:12px 14px;}
+  .rs-stat .k{font-size:.78rem;color:#6b5a38;}
+  .rs-stat .v{font-family:'Nanum Myeongjo',serif;font-size:1.25rem;font-weight:700;
+    color:#2a2114;}
+  .rs-stat .v small{font-size:.8rem;color:#a67c3c;}
+  .rs-foot{text-align:center;border-top:1px solid #c9b487;margin-top:30px;
+    padding-top:16px;font-size:.8rem;color:#8a7444;font-style:italic;}
+  @media(max-width:680px){
+    .wrap{padding:40px 16px 80px;}
+    .card{padding:28px 22px;}
+    h1{font-size:1.9rem;}
+    .grid2{grid-template-columns:1fr;}
+    .report-sheet{padding:36px 24px;}
+  }
+  @media print{
+    body::before,.stars,header,.card,.btn{display:none!important;}
+    #report{display:block!important;margin:0;}
+    .report-sheet{box-shadow:none;}
+  }
+</style>
+</head>
+<body>
+<div class="stars" id="stars"></div>
+<div class="wrap">
+
+  <header>
+    <div class="chapter">Chapter · 광야의 기록</div>
+    <div class="sun"></div>
+    <h1>광야의 기록</h1>
+    <p class="subtitle">수련회 평가 리포트 생성기</p>
+    <p class="verse">"숨겨진 X를 찾아서 — 하나님 나라, 하나님의 방식으로"</p>
+  </header>
+
+  <div class="card">
+    <div class="card-label">Section I</div>
+    <h2>수련회 기본 정보</h2>
+    <div class="grid2">
+      <div>
+        <label>수련회 명칭</label>
+        <input id="f_name" placeholder="예: 2026 여름수련회 'X를 찾아서'">
+      </div>
+      <div>
+        <label>일정</label>
+        <input id="f_date" placeholder="예: 2026.7.28 ~ 7.30 (2박 3일)">
+      </div>
+      <div>
+        <label>장소</label>
+        <input id="f_place" placeholder="예: 새문안수양관 (가평 운악산)">
+      </div>
+      <div>
+        <label>참석 인원</label>
+        <input id="f_count" placeholder="예: 학생 58명 / 교사 12명">
+      </div>
+      <div>
+        <label>주제</label>
+        <input id="f_theme" value="하나님 나라, 하나님의 방식으로">
+      </div>
+      <div>
+        <label>작성자 / 담당</label>
+        <input id="f_writer" placeholder="예: 중고등부 담당 ○○○">
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Section II</div>
+    <h2>영역별 평가</h2>
+    <p class="hint" style="margin-bottom:8px;">각 항목을 별 1~5개로 평가해 주세요. 리포트에 점수와 총평이 반영됩니다.</p>
+    <div id="ratings"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Section III</div>
+    <h2>서술 평가</h2>
+    <label>가장 잘 된 점 (은혜가 된 순간)</label>
+    <textarea id="f_good" placeholder="예: 2일차 저녁 집회 회개 기도 시간에 많은 학생이 자발적으로 반응함..."></textarea>
+    <label>아쉬웠던 점 / 개선이 필요한 부분</label>
+    <textarea id="f_bad" placeholder="예: 1일차 일정이 빡빡해 소그룹 나눔 시간이 부족했음..."></textarea>
+    <label>학생들의 반응 · 인상 깊었던 이야기</label>
+    <textarea id="f_voice" placeholder="예: 한 학생이 '처음으로 하나님이 진짜 계신 것 같았다'고 나눔..."></textarea>
+    <label>다음 수련회를 위한 제안</label>
+    <textarea id="f_next" placeholder="예: 소그룹 인원을 5명으로 축소 / 저녁 집회 시간 30분 추가 확보..."></textarea>
+  </div>
+
+  <button class="btn" onclick="generate()">▦  평가 리포트 생성하기</button>
+
+  <div id="report">
+    <div class="report-sheet" id="sheet"></div>
+    <button class="btn ghost" onclick="window.print()" style="margin-top:20px;">⎙  인쇄 / PDF로 저장</button>
+    <button class="btn ghost" onclick="document.getElementById('report').style.display='none';window.scrollTo(0,0);">↑  다시 작성하기</button>
+  </div>
+
+</div>
+
+<script>
+// stars
+const sc=document.getElementById('stars');
+for(let i=0;i<34;i++){
+  const s=document.createElement('div');s.className='star';
+  const z=Math.random()*2+1;
+  s.style.width=z+'px';s.style.height=z+'px';
+  s.style.left=Math.random()*100+'%';s.style.top=Math.random()*70+'%';
+  s.style.animationDelay=Math.random()*5+'s';
+  sc.appendChild(s);
+}
+
+// rating items
+const RATINGS=[
+  {id:'r_lecture',label:'교리 강의 (알기 · Know)'},
+  {id:'r_worship',label:'저녁 집회 (느끼기 · Feel)'},
+  {id:'r_group',label:'소그룹 나눔'},
+  {id:'r_rec',label:'레크레이션 · 게임'},
+  {id:'r_meal',label:'식사 · 숙소 · 편의'},
+  {id:'r_safety',label:'안전 관리'},
+  {id:'r_schedule',label:'일정 운영'},
+  {id:'r_decision',label:'결단 · 파송 (살기 · Live)'},
+];
+const scores={};
+const rc=document.getElementById('ratings');
+RATINGS.forEach(it=>{
+  scores[it.id]=0;
+  const row=document.createElement('div');row.className='rating-row';
+  const sp=document.createElement('span');sp.textContent=it.label;
+  const pick=document.createElement('div');pick.className='stars-pick';
+  for(let n=1;n<=5;n++){
+    const b=document.createElement('button');b.className='sp';b.textContent='★';
+    b.onclick=()=>{
+      scores[it.id]=n;
+      [...pick.children].forEach((c,i)=>c.classList.toggle('on',i<n));
+    };
+    pick.appendChild(b);
+  }
+  row.appendChild(sp);row.appendChild(pick);
+  rc.appendChild(row);
+});
+
+function v(id){return document.getElementById(id).value.trim();}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+
+function verdict(avg){
+  if(avg>=4.5)return'전반적으로 매우 은혜롭고 안정적으로 진행된 수련회였습니다. 핵심 목표인 알기·느끼기·살기가 균형 있게 이루어졌습니다.';
+  if(avg>=3.7)return'전반적으로 잘 진행된 수련회였으며, 몇 가지 보완점을 다음 수련회에 반영하면 더욱 성숙한 캠프가 될 것으로 보입니다.';
+  if(avg>=2.8)return'기본적인 목표는 달성되었으나, 일정과 운영 면에서 개선이 필요한 부분이 확인되었습니다. 아래 제안을 검토해 주시기 바랍니다.';
+  return'여러 영역에서 보완이 필요한 것으로 평가되었습니다. 다음 수련회 준비 시 운영 전반에 대한 점검을 권합니다.';
+}
+
+function generate(){
+  const filled=Object.values(scores).filter(x=>x>0);
+  const avg=filled.length?filled.reduce((a,b)=>a+b,0)/filled.length:0;
+  const name=v('f_name')||'2026 여름수련회';
+  const today=new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric'});
+
+  let statHtml='';
+  RATINGS.forEach(it=>{
+    const s=scores[it.id];
+    const stars=s? '★'.repeat(s)+'☆'.repeat(5-s) : '미평가';
+    statHtml+=`<div class="rs-stat"><div class="k">${it.label}</div>
+      <div class="v">${s?stars:'<small>미평가</small>'}</div></div>`;
+  });
+
+  const sect=(title,val)=> val ? `<div class="rs-section"><h3>${title}</h3><p>${esc(val)}</p></div>` : '';
+
+  document.getElementById('sheet').innerHTML=`
+    <div class="rs-head">
+      <div class="rs-chapter">Retreat Evaluation Report · 광야의 기록</div>
+      <div class="rs-title">${esc(name)}</div>
+      <div class="rs-meta">${esc(v('f_date')||'-')} &nbsp;·&nbsp; ${esc(v('f_place')||'-')} &nbsp;·&nbsp; ${esc(v('f_count')||'-')}</div>
+      <div class="rs-meta" style="margin-top:4px;">주제: ${esc(v('f_theme')||'-')}</div>
+    </div>
+
+    <div class="rs-section">
+      <h3>Ⅰ. 종합 총평</h3>
+      <p>${filled.length? `8개 평가 영역 중 ${filled.length}개 영역 평균 <b>${avg.toFixed(1)} / 5.0</b>점.\n\n${verdict(avg)}` : '영역별 평가가 입력되지 않았습니다.'}</p>
+    </div>
+
+    <div class="rs-section">
+      <h3>Ⅱ. 영역별 평가</h3>
+      <div class="rs-stat-grid">${statHtml}</div>
+    </div>
+
+    ${sect('Ⅲ. 잘 된 점 — 은혜가 된 순간', v('f_good'))}
+    ${sect('Ⅳ. 아쉬웠던 점 — 개선이 필요한 부분', v('f_bad'))}
+    ${sect('Ⅴ. 학생들의 반응', v('f_voice'))}
+    ${sect('Ⅵ. 다음 수련회를 위한 제안', v('f_next'))}
+
+    <div class="rs-foot">
+      "너희는 이 세대를 본받지 말고 오직 마음을 새롭게 함으로 변화를 받아" — 로마서 12:2<br>
+      작성: ${esc(v('f_writer')||'중고등부')} &nbsp;|&nbsp; 작성일 ${today}
+    </div>
+  `;
+  document.getElementById('report').style.display='block';
+  document.getElementById('report').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
